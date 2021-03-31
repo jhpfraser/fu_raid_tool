@@ -1,0 +1,82 @@
+﻿DONE - option to make social buttons in eq automatically
+SORTA, USED TO VALIDATE - read eq characters by enumerating charname_servername.ini files
+DONE - validate fu username and passwords via http
+configs by character
+DONE - add enable system command (eqclient.ini -> enablesystemcommand=1)
+DONE - use a folder to store logs and ability to resend if failed
+check if config file from a diff user fucks everything up
+
+how it works
+
+Running vanilla (no params)
+- checks to see if its in the correct FuEQ folder, 
+	if not assume new install or upgrade depending on existence of FuEQ folder and config file.  
+	
+	New install creates log folder and config file from default config file (found in FuEQ class)
+
+	upgrade just copies the exe assuming there might be shit in the log folder to process yet, and assuming the config file is okay
+
+	in either case a desktop icon is created, it doesnt seem to care if it already exists
+
+	the installer then spawns the exe in the correct folder as a new process
+
+	the installer exits (leaving the new process running)
+
+- opens config screen
+	eq folder is checked to contain eqclient.ini or its invalid
+	username / server name are checked vs <username>_<servername>.ini in eq folder (some subfolder) else invalid
+
+	once those 2 things are checked you can get into the socials screen
+
+	lootminutes = how long to check for loot tells once the dump button is pressed to be considered part of this event's loot
+
+	lootlookupminutes = how long to check for tells to you before adding them to the loot lookup that opens in a browser
+
+	fu username/password = for the web site.  Test button checks (vs the website).  When you hit save it won't let you save unless you have a valid logon.  These two values are encrypted before being stored in config file using "this fucking computer/this user" can only decrypt.
+
+- socials screen
+	upon load this reads the socials from your toon_server.ini file and makes a mockup of the eq socials thing
+
+	CLICK A SOCIAL to edit it
+
+	the edits allowed are 
+		- change this social to one of the 4 needed Buttons
+		- clear (delete) this social
+	When the changes are made to toon_server.ini, the user is annoyingly prompted to not fuck this up
+	As advertised, don't be in eq when you change this stuff (maybe at server select is ok?)
+
+	the buttons are in the same format as piyper's buttons, ie
+	/system "<path to this executable>" command yourtoon param1
+
+	the 4 buttons are currently stored, perhaps awkwardly, as subclasses of FuEQ.SocialButton
+
+	the parameters and username for the commands come from the current config(?) when an edit/delete button is pressed
+
+Running with params
+
+	When this app is called with command line params, it is usually being run by EQ in response to a click on a social
+
+	The only configurable settings used during this part come from the command line (so, the config file is not used) except for eqfolder (eqlogfolder) and the http username/password
+	Theoretically you could set up 2 toons as long as they had the same eq folder - I have not yet added support for multiple eq folders
+
+	the commands are
+	- config (the default when run with no params, opens config screen blah blah)
+	- loot
+		- builds a parsed log out of guild tells relevant to loot
+		- saves it in log folder
+		- send update is called which:
+			- looks for incomplete and new logs in folder
+			- tries to send all of them (to a service that I havent written yet.  Version 1 will be "copy the uploaded stuff to the ftp folder and call the php that updates out of the ftp folder") via form POST
+			- marks them as complete or incomplete again
+
+	- loot lookup
+		- grabs the last x minutes of tells, where x is a param that was passed by the button
+		- makes a list of the names
+		- opens a browser to fublahblah/lootlookup w the names on the querystring
+
+	- attendance
+		- doesnt work yet
+
+	- guildroster
+		- doesnt work yet
+
